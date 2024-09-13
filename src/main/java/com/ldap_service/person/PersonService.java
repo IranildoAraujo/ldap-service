@@ -97,10 +97,12 @@ public class PersonService {
 		return ldapTemplate.findOne(ldapBuilder, Person.class);
 	}
 
+	//TODO: Funcional para cenários de negócio, ruim para testes
+	// de integração, mantido por enquanto.
 	public List<PersonDTO> findAll() {
 		return ldapTemplate.findAll(Person.class).stream().map(Person::toDTO).toList();
 	}
-
+	
 	public List<PersonDTO> findAllByLastName(String lastName) {
 		return ldapTemplate.find(LdapQueryBuilder.query().where("sn").is(lastName), Person.class).stream()
 				.map(Person::toDTO).toList();

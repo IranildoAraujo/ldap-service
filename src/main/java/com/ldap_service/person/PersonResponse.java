@@ -4,6 +4,11 @@ import java.util.List;
 
 import javax.naming.Name;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ldap_service.ldap.LdapNameSerializer;
+import com.ldap_service.ldap.NameDeserializer;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +21,8 @@ public class PersonResponse {
 	
 	private String entryUUID;
 
+	@JsonSerialize(using = LdapNameSerializer.class)
+	@JsonDeserialize(using = NameDeserializer.class)
 	private Name dn;
 	
 	private String ou;

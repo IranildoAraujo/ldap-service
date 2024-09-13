@@ -1,9 +1,13 @@
 package com.ldap_service.person;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.naming.Name;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ldap_service.ldap.LdapNameSerializer;
+import com.ldap_service.ldap.NameDeserializer;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,6 +21,8 @@ public class PersonDTO {
 
 	private String entryUUID;
 	
+	@JsonSerialize(using = LdapNameSerializer.class)
+	@JsonDeserialize(using = NameDeserializer.class)
 	private Name dn;
 	
 	private String ou;
@@ -43,11 +49,9 @@ public class PersonDTO {
 	}
 
 	public PersonResponse toResponse() {
-		return Objects.nonNull(dn)
-				? PersonResponse.builder().entryUUID(entryUUID).dn(dn).ou(ou).cn(cn).sn(sn)
-						.telephoneNumber(telephoneNumber).objectClasses(objectClasses).description(description)
-						.jpegPhoto(jpegPhoto).build()
-				: null;
+		return PersonResponse.builder().entryUUID(entryUUID).dn(dn != null ? dn : null).ou(ou).cn(cn).sn(sn)
+				.telephoneNumber(telephoneNumber).objectClasses(objectClasses).description(description)
+				.jpegPhoto(jpegPhoto).build();
 
 	}
 }

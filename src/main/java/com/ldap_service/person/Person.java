@@ -9,8 +9,10 @@ import org.springframework.ldap.odm.annotations.Attribute.Type;
 import org.springframework.ldap.odm.annotations.Entry;
 import org.springframework.ldap.odm.annotations.Id;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.ldap_service.ldap.LdapNameSerializer;
+import com.ldap_service.ldap.NameDeserializer;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,7 +29,8 @@ public class Person {
 	private String entryUUID;
 	
 	@Id
-	@JsonSerialize(using = LdapNameSerializer.class)
+    @JsonSerialize(using = LdapNameSerializer.class)
+	@JsonDeserialize(using = NameDeserializer.class)
 	private Name dn;
 	
 	@Attribute(name = "ou")
