@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.naming.Name;
 
+import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
@@ -24,45 +25,66 @@ public class PersonService {
 		this.ldapTemplate = ldapTemplate;
 	}
 
+//	public Person create(PersonDTO personDTO) {
+//        var person = personDTO.toModel();
+//
+//        // 1. Verificação Prévia Aprimorada:
+//        if (userExists(person.getDn())) {
+//            throw new IllegalArgumentException("Usuário com DN '" + person.getDn() + "' já existe!");
+//        }
+//
+//        // 2. Criando a Entrada com 'create':
+//        DirContextAdapter context = new DirContextAdapter(person.getDn());
+//        context.setAttributeValues("objectclass", 
+//               new String[] { "top", "person", "organizationalPerson", "inetOrgPerson" });
+//        context.setAttributeValue("cn", person.getCn());
+//        context.setAttributeValue("sn", person.getSn());
+//        context.setAttributeValue("userPassword", "{SHA}" + digestSHA("###123")); 
+//
+//        ldapTemplate.create(context);
+//        return person;
+//    }
+	
 	public Person create(PersonDTO personDTO) {
-		var person = personDTO.toModel();
-		var dnStr = person.getDn().toString();
-		// Verifique se já existe uma entrada com o mesmo DN
-		if (entryExists(dnStr)) {
-			// Trate a existência da entrada (ex: lançando uma exceção ou retornando um
-			// erro)
-			throw new IllegalArgumentException("Já existe um usuário com o DN: " + dnStr);
-		}
+        var person = personDTO.toModel();
 
-		System.out.println("DN: " + person.getDn());
-		DirContextAdapter context = new DirContextAdapter(person.getDn());
-		context.setAttributeValues("objectclass",
-				new String[] { "top", "person", "organizationalPerson", "inetOrgPerson" });
-		context.setAttributeValue("cn", person.getCn());
-		context.setAttributeValue("sn", person.getSn());
-		context.setAttributeValue("userPassword", "{SHA}" + digestSHA("###123"));
+        // 1. Verificação Prévia (Mantida para Segurança):
+        if (userExists(person.getDn())) {
+            throw new IllegalArgumentException("Usuário com DN '" + person.getDn() + "' já existe!");
+        }
 
-		ldapTemplate.bind(context);
+        // 2. Criação Direta com 'bind()':
+        DirContextAdapter context = new DirContextAdapter(person.getDn());
+        context.setAttributeValues("objectclass", 
+        		personDTO.getObjectClasses().toArray(new String[0])
+        		);
+        context.setAttributeValue("cn", person.getCn());
+        context.setAttributeValue("sn", person.getSn());
+        context.setAttributeValue("userPassword", "{SHA}" + digestSHA("###123")); 
 
-//		ldapTemplate.create(person);
-		return person;
-	}
+        ldapTemplate.bind(context);  // <- Usando 'bind()' diretamente!
 
-	public void modify(String username, String password) {
+        return person;
+    }
+
+
+	public void updatePassword(String username, String password) {
 		Name dn = LdapNameBuilder.newInstance().add("ou", "users").add("cn", username).build();
 		DirContextOperations context = ldapTemplate.lookupContext(dn);
 
-		context.setAttributeValues("objectclass",
-				new String[] { "top", "person", "organizationalPerson", "inetOrgPerson" });
-		context.setAttributeValue("cn", username);
-		context.setAttributeValue("sn", username);
+		// TODO: Cada setAttributeValue modifica a propriedade mencionada: 
+//		context.setAttributeValues("objectclass",
+//				new String[] { "top", "person", "organizationalPerson", "inetOrgPerson" }
+//		);
+//		context.setAttributeValue("cn", username);
+//		context.setAttributeValue("sn", username);
 		context.setAttributeValue("userPassword", digestSHA(password));
 
 		ldapTemplate.modifyAttributes(context);
 	}
 
 	public void update(PersonDTO personDTO) {
-		if (entryExists(personDTO.getDn().toString())) {
+		if (userExists(personDTO.getDn(), personDTO.getCn())) {
 			throw new IllegalArgumentException("Não existe um usuário com o DN: " + personDTO.getEntryUUID());
 		}
 		ldapTemplate.update(personDTO.toModel());
@@ -97,8 +119,6 @@ public class PersonService {
 		return ldapTemplate.findOne(ldapBuilder, Person.class);
 	}
 
-	//TODO: Funcional para cenários de negócio, ruim para testes
-	// de integração, mantido por enquanto.
 	public List<PersonDTO> findAll() {
 		return ldapTemplate.findAll(Person.class).stream().map(Person::toDTO).toList();
 	}
@@ -107,10 +127,28 @@ public class PersonService {
 		return ldapTemplate.find(LdapQueryBuilder.query().where("sn").is(lastName), Person.class).stream()
 				.map(Person::toDTO).toList();
 	}
+	
+    private boolean userExists(Name dn) {
+        try {
+            ldapTemplate.lookup(dn);
+            return true; // Encontrou a entrada, então o usuário existe
+        } catch (NameNotFoundException e) {
+            return false; // A entrada não foi encontrada
+        }
+    }
 
-	private boolean entryExists(String dn) {
-		return ldapTemplate.lookup(dn) != null;
-	}
+	 private boolean userExists(Name ou, String cn) {
+	        Name dn = LdapNameBuilder.newInstance(ou)
+	                                 .add("cn", cn)
+	                                 .build();
+
+	        try {
+	            ldapTemplate.lookup(dn); // Tenta encontrar a entrada pelo DN completo
+	            return true; // Se encontrou, o usuário existe
+	        } catch (NameNotFoundException e) {
+	            return false; // Se lançou a exceção, o usuário não existe
+	        }
+	    }
 
 	// TODO: Método para gerar o hash SHA
 	private String digestSHA(String input) {

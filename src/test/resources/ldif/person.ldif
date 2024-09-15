@@ -3,6 +3,7 @@ dn: dc=example,dc=com
 dc: example
 objectClass: domain
 
+# Define um usuário admin com senha
 dn: cn=admin,dc=example,dc=com
 cn: admin
 objectClass: top

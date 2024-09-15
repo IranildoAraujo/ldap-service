@@ -16,15 +16,11 @@ import javax.naming.ldap.LdapName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.query.ContainerCriteria;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
 class PersonServiceTest {
 
 	private PersonService personService;
@@ -59,7 +55,6 @@ class PersonServiceTest {
 		when(ldapTemplate.findOne(any(ContainerCriteria.class), eq(Person.class))).thenReturn(null);
 
 		var person = personService.findByUuid("x");
-		System.out.println("[PERSON ATUAL]: " + person);
 		assertNotEquals(getPerson(), person);
 	}
 
