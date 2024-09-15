@@ -84,3 +84,11 @@ sudo docker rm <CONTAINER ID ou o NAMES>
 <span style="color:red"><strong>ATENÇÃO: </strong></span> 
 Ter permissões de administrador no sistema operacional testado.
 O Docker não vai deixar remover se ele estiver em execução.
+
+## Instruções para executar os testes de cobertura 
+
+- Adicionar a variável de ambiente abaixo no **Run Configuration** da IDE:
+
+```
+ SPRING_PROFILES_ACTIVE=test
+```
