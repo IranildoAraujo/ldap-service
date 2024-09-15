@@ -55,7 +55,7 @@ docker run --name my-openldap-container \
 - Define o domínio LDAP= `-e LDAP_DOMAIN="example.com"`
 - Define a senha do administrador= `-e LDAP_ADMIN_PASSWORD="adminpassword"`
 
-## Comandos para gerênciar a imagem docker do OpenLDAP:
+## Comandos para gerenciar a imagem docker do OpenLDAP:
 
 - Verificar container em execução:
 
