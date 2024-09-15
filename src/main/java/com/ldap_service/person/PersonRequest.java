@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.naming.Name;
 
-import org.springframework.ldap.support.LdapNameBuilder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ldap_service.ldap.LdapNameSerializer;
+import com.ldap_service.ldap.NameDeserializer;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,9 +21,9 @@ public class PersonRequest {
 	
 	private String entryUUID;
 	
-	private String dn;
-	
-	private String ou;
+	@JsonSerialize(using = LdapNameSerializer.class)
+	@JsonDeserialize(using = NameDeserializer.class)
+	private Name dn;
 
 	private String cn;
 
@@ -41,18 +44,12 @@ public class PersonRequest {
 	public PersonDTO toDTO() {
 
 		var personBuilder = PersonDTO.builder();
-		System.out.println(">>>>>> 1 - [TEST]: " + "cn=" + cn + ",ou=" + ou);
-		System.out.println(">>>>>> 2 - [TEST]: " + dn);
-		if (dn.equals("cn=" + cn + ",ou=" + ou)) {
-			Name dn = LdapNameBuilder.newInstance().add("ou", ou).add("cn", cn).build();
-			personBuilder.dn(dn);
-		}
 
 		return personBuilder
 
 				.entryUUID(entryUUID)
-				
-				.ou(ou)
+
+				.dn(dn)
 
 				.cn(cn)
 

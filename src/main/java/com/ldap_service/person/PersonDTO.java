@@ -25,8 +25,6 @@ public class PersonDTO {
 	@JsonDeserialize(using = NameDeserializer.class)
 	private Name dn;
 	
-	private String ou;
-
 	private String cn;
 
 	private String sn;
@@ -44,12 +42,14 @@ public class PersonDTO {
 	}
 
 	public Person toModel() {
-		return Person.builder().entryUUID(entryUUID).dn(dn).ou(ou).cn(cn).sn(sn).telephoneNumber(telephoneNumber)
+		return Person.builder().entryUUID(entryUUID).dn(dn)
+				.cn(cn).sn(sn).telephoneNumber(telephoneNumber)
 				.objectClasses(objectClasses).description(description).jpegPhoto(jpegPhoto).build();
 	}
 
 	public PersonResponse toResponse() {
-		return PersonResponse.builder().entryUUID(entryUUID).dn(dn != null ? dn : null).ou(ou).cn(cn).sn(sn)
+		return PersonResponse.builder().entryUUID(entryUUID).dn(dn != null ? dn : null)
+				.cn(cn).sn(sn)
 				.telephoneNumber(telephoneNumber).objectClasses(objectClasses).description(description)
 				.jpegPhoto(jpegPhoto).build();
 

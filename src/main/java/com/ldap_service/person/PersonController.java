@@ -39,7 +39,7 @@ public class PersonController {
 	@PutMapping("/{username}/password")
 	public ResponseEntity<String> updatePassword(@PathVariable String username, @RequestBody String password) {
 		try {
-			personService.modify(username, password);
+			personService.updatePassword(username, password);
 			return ResponseEntity.ok("Senha atualizada com sucesso!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -63,7 +63,6 @@ public class PersonController {
 	@DeleteMapping("{uuid}")
 	public void remove(@PathVariable String uuid) {
 		personService.deletePersonByUuid(uuid);
-//		personService.delete(uuid);
 	}
 
 }

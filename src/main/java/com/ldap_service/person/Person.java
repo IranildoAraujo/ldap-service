@@ -22,7 +22,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Entry(objectClasses = { "inetOrgPerson", "organizationalPerson", "person", "top" })
+@Entry(objectClasses = {"person"})
 public class Person {
 	
 	@Attribute(name = "entryUUID")
@@ -32,9 +32,6 @@ public class Person {
     @JsonSerialize(using = LdapNameSerializer.class)
 	@JsonDeserialize(using = NameDeserializer.class)
 	private Name dn;
-	
-	@Attribute(name = "ou")
-	private String ou;
 
 	@Attribute(name = "cn")
 	private String cn;
@@ -64,8 +61,6 @@ public class Person {
 				.entryUUID(entryUUID)
 
 				.dn(dn)
-				
-				.ou(ou)
 				
 				.cn(cn)
 				
