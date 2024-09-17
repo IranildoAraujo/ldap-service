@@ -1,5 +1,5 @@
 # Ignorar diretório #
-*/target/*
+target/
 
 # Compiled class file
 *.class
