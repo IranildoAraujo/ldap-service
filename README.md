@@ -24,7 +24,7 @@ Importar o projeto como um projeto Maven existente.
 
 ## Variáveis de ambiente
 
-- SPRING_PROFILES_ACTIVE=dev
+- PROFILES_ACTIVE=dev
 - LDAP_SERVICE={Adicionar o nome do serviço ldap}
 - LDAP_URL={Adicione a url de conexão com o servidor ldap}
 - LDAP_BASE={Adicione o nome da base}
@@ -90,5 +90,5 @@ O Docker não vai deixar remover se ele estiver em execução.
 - Adicionar a variável de ambiente abaixo no **Run Configuration** da IDE:
 
 ```
- SPRING_PROFILES_ACTIVE=test
+ PROFILES_ACTIVE=test
 ```
