@@ -44,35 +44,32 @@ public class PersonService {
 //        ldapTemplate.create(context);
 //        return person;
 //    }
-	
+
 	public Person create(PersonDTO personDTO) {
-        var person = personDTO.toModel();
+		var person = personDTO.toModel();
 
-        // 1. Verificação Prévia (Mantida para Segurança):
-        if (userExists(person.getDn())) {
-            throw new IllegalArgumentException("Usuário com DN '" + person.getDn() + "' já existe!");
-        }
+		// 1. Verificação Prévia (Mantida para Segurança):
+		if (userExists(person.getDn())) {
+			throw new IllegalArgumentException("Usuário com DN '" + person.getDn() + "' já existe!");
+		}
 
-        // 2. Criação Direta com 'bind()':
-        DirContextAdapter context = new DirContextAdapter(person.getDn());
-        context.setAttributeValues("objectclass", 
-        		personDTO.getObjectClasses().toArray(new String[0])
-        		);
-        context.setAttributeValue("cn", person.getCn());
-        context.setAttributeValue("sn", person.getSn());
-        context.setAttributeValue("userPassword", "{SHA}" + digestSHA("###123")); 
+		// 2. Criação Direta com 'bind()':
+		DirContextAdapter context = new DirContextAdapter(person.getDn());
+		context.setAttributeValues("objectclass", personDTO.getObjectClasses().toArray(new String[0]));
+		context.setAttributeValue("cn", person.getCn());
+		context.setAttributeValue("sn", person.getSn());
+		context.setAttributeValue("userPassword", "{SHA}" + digestSHA("###123"));
 
-        ldapTemplate.bind(context);  // <- Usando 'bind()' diretamente!
+		ldapTemplate.bind(context); // <- Usando 'bind()' diretamente!
 
-        return person;
-    }
-
+		return person;
+	}
 
 	public void updatePassword(String username, String password) {
 		Name dn = LdapNameBuilder.newInstance().add("ou", "users").add("cn", username).build();
 		DirContextOperations context = ldapTemplate.lookupContext(dn);
 
-		// TODO: Cada setAttributeValue modifica a propriedade mencionada: 
+		// TODO: Cada setAttributeValue modifica a propriedade mencionada:
 //		context.setAttributeValues("objectclass",
 //				new String[] { "top", "person", "organizationalPerson", "inetOrgPerson" }
 //		);
@@ -95,8 +92,8 @@ public class PersonService {
 		ldapTemplate.delete(person);
 	}
 
-	// TODO: Mantido para consultas: 
-	//	usa o new EqualsFilter("entryUUID", uuid) no filter
+	// TODO: Mantido para consultas:
+	// usa o new EqualsFilter("entryUUID", uuid) no filter
 //	public void deletePersonByUuid(String uuid) {
 //
 //		LdapQuery query = LdapQueryBuilder.query().filter(new EqualsFilter("entryUUID", uuid));
@@ -108,12 +105,12 @@ public class PersonService {
 //
 //		ldapTemplate.unbind(persons.get(0).getDn());
 //	}
-	
+
 	public void deletePersonByUuid(String uuid) {
 		var person = findByUuid(uuid);
 		ldapTemplate.unbind(person.getDn());
 	}
-	
+
 	public Person findByUuid(String uuid) {
 		var ldapBuilder = LdapQueryBuilder.query().where("entryUUID").is(uuid);
 		return ldapTemplate.findOne(ldapBuilder, Person.class);
@@ -122,38 +119,35 @@ public class PersonService {
 	public List<PersonDTO> findAll() {
 		return ldapTemplate.findAll(Person.class).stream().map(Person::toDTO).toList();
 	}
-	
+
 	public List<PersonDTO> findAllByLastName(String lastName) {
 		return ldapTemplate.find(LdapQueryBuilder.query().where("sn").is(lastName), Person.class).stream()
 				.map(Person::toDTO).toList();
 	}
-	
-    private boolean userExists(Name dn) {
-        try {
-            ldapTemplate.lookup(dn);
-            return true; // Encontrou a entrada, então o usuário existe
-        } catch (NameNotFoundException e) {
-            return false; // A entrada não foi encontrada
-        }
-    }
 
-	 private boolean userExists(Name ou, String cn) {
-	        Name dn = LdapNameBuilder.newInstance(ou)
-	                                 .add("cn", cn)
-	                                 .build();
+	private boolean userExists(Name dn) {
+		try {
+			ldapTemplate.lookup(dn);
+			return true;
+		} catch (NameNotFoundException e) {
+			return false;
+		}
+	}
 
-	        try {
-	            ldapTemplate.lookup(dn); // Tenta encontrar a entrada pelo DN completo
-	            return true; // Se encontrou, o usuário existe
-	        } catch (NameNotFoundException e) {
-	            return false; // Se lançou a exceção, o usuário não existe
-	        }
-	    }
+	private boolean userExists(Name ou, String cn) {
+		Name dn = LdapNameBuilder.newInstance(ou).add("cn", cn).build();
 
-	// TODO: Método para gerar o hash SHA
+		try {
+			ldapTemplate.lookup(dn); // Tenta encontrar a entrada pelo DN completo
+			return true;
+		} catch (NameNotFoundException e) {
+			return false;
+		}
+	}
+
 	private String digestSHA(String input) {
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-1"); // Escolha o algoritmo SHA desejado
+			MessageDigest md = MessageDigest.getInstance("SHA-1");
 			byte[] messageDigest = md.digest(input.getBytes());
 			BigInteger no = new BigInteger(1, messageDigest);
 			return no.toString(16); // Retorna o hash em hexadecimal
