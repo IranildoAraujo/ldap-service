@@ -20,7 +20,21 @@ public class PersonController {
 
 	@Autowired
 	private PersonService personService;
-
+	
+	//TODO: 1°
+	//TODO: Mantido para validar parâmetros na URL.
+	//TODO: Exemplo lançando status: 400 
+	//TODO: Passando ""(aspas duplas) na URL: http://localhost:8080/api/v1/personas/""/filtro
+	//TODO: Passando ''(aspas simples) na URL: http://localhost:8080/api/v1/personas/''/filtro
+	//TODO: Passando null(null) na URL: http://localhost:8080/api/v1/personas/null/filtro
+    @PostMapping("/{sn}/filtro")
+    public ResponseEntity<String> filtro(@PathVariable(required = false) String sn) {
+//    	if (sn == null || sn.trim().isEmpty()) {
+//            throw new BadRequestException("O parâmetro 'texto' não pode ser nulo ou vazio.");
+//        }
+        return new ResponseEntity<>("Filtro realizado com sucesso!", HttpStatus.OK);
+    }
+	
 	@GetMapping
 	public List<PersonResponse> findAll() {
 		return personService.findAll().stream().map(PersonDTO::toResponse).toList();
@@ -35,7 +49,7 @@ public class PersonController {
 	public ResponseEntity<Person> create(@RequestBody PersonRequest personRequest) {
 		return ResponseEntity.ok(personService.create(personRequest.toDTO()));
 	}
-
+	
 	@PutMapping("/{username}/password")
 	public ResponseEntity<String> updatePassword(@PathVariable String username, @RequestBody String password) {
 		try {
