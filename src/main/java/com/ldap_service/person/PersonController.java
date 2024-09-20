@@ -27,13 +27,15 @@ public class PersonController {
 	//TODO: Passando ""(aspas duplas) na URL: http://localhost:8080/api/v1/personas/""/filtro
 	//TODO: Passando ''(aspas simples) na URL: http://localhost:8080/api/v1/personas/''/filtro
 	//TODO: Passando null(null) na URL: http://localhost:8080/api/v1/personas/null/filtro
-    @PostMapping("/{sn}/filtro")
-    public ResponseEntity<String> filtro(@PathVariable(required = false) String sn) {
+	@PostMapping("/{sn}/filtro")
+	public ResponseEntity<String> filtro(@PathVariable(required = false) String sn) {
 //    	if (sn == null || sn.trim().isEmpty()) {
 //            throw new BadRequestException("O parâmetro 'texto' não pode ser nulo ou vazio.");
 //        }
-        return new ResponseEntity<>("Filtro realizado com sucesso!", HttpStatus.OK);
-    }
+		var lst = personService.findAllByLastName(sn).stream().map(PersonDTO::toResponse).toList();
+		return !lst.isEmpty() ? new ResponseEntity<>("Filtro realizado com sucesso!", HttpStatus.OK)
+				: ResponseEntity.status(HttpStatus.NOT_FOUND).body("SN não encontrado.");
+	}
 	
 	@GetMapping
 	public List<PersonResponse> findAll() {
